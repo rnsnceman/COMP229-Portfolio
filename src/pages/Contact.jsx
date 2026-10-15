@@ -1,17 +1,25 @@
-import { CodeXml, ExternalLink, Mail, MapPin, Phone } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import React from "react";
+import { CodeXml, ExternalLink, Mail, MapPin } from "lucide-react";
 export default function Contact() {
-  const navigate = useNavigate();
-  function handleSubmit(event) {
+  const [status, setStatus] = React.useState({ type: "", message: "" });
+  async function handleSubmit(event) {
     event.preventDefault();
-    const formData = Object.fromEntries(
-      new FormData(event.currentTarget).entries(),
-    );
-    sessionStorage.setItem(
-      "portfolioContactSubmission",
-      JSON.stringify(formData),
-    );
-    navigate("/?message=sent");
+    const form = event.currentTarget;
+    const data = Object.fromEntries(new FormData(form).entries());
+    setStatus({ type: "info", message: "Sending your message…" });
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/contacts`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ firstname: data.firstName, lastname: data.lastName, email: data.email, phone: data.phone, message: data.message }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.message || "Unable to send your message.");
+      form.reset();
+      setStatus({ type: "success", message: "Thanks — your message has been received." });
+    } catch (error) {
+      setStatus({ type: "error", message: `${error.message} Make sure the API server is running.` });
+    }
   }
   return (
     <main className="page-shell page-content">
@@ -86,6 +94,7 @@ export default function Contact() {
           <button className="button primary" type="submit">
             Send message
           </button>
+          {status.message && <p role="status" aria-live="polite" className={`form-status ${status.type}`}>{status.message}</p>}
         </form>
       </section>
     </main>
