@@ -1,4 +1,7 @@
 import { Route, Routes } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import Auth from "./pages/Auth";
+import Manage from "./pages/Manage";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Home from "./pages/Home";
@@ -10,7 +13,7 @@ import Contact from "./pages/Contact";
 
 export default function App() {
   return (
-    <>
+    <AuthProvider>
       <Header />
       <Routes>
         <Route path="/" element={<Home />} />
@@ -19,8 +22,12 @@ export default function App() {
         <Route path="/education" element={<Education />} />
         <Route path="/services" element={<Services />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/signin" element={<Auth key="signin" />} />
+        <Route path="/signup" element={<Auth key="signup" signup />} />
+        <Route path="/manage" element={<Manage />} />
+        <Route path="*" element={<main className="page-shell page-content"><h1>Page not found</h1><a href="/">Return home</a></main>} />
       </Routes>
       <Footer />
-    </>
+    </AuthProvider>
   );
 }

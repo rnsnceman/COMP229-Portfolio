@@ -612,3 +612,34 @@ main {
     transition: none !important;
   }
 }
+
+/* Assignment 3 account forms and portfolio management */
+.nav-links { gap: clamp(12px, 2vw, 27px); }
+.nav-action { background: none; border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; color: var(--ink); cursor: pointer; }
+.auth-page { max-width: 650px; }
+.auth-page .contact-form, .record-form { border: 1px solid var(--line); border-radius: 22px; }
+.auth-page .page-heading h1 { font-size: clamp(3rem, 7vw, 5rem); }
+.form-status { padding: 12px 0; overflow-wrap: anywhere; }
+.form-status.error { color: #ffadb6; }
+.form-status.success { color: #8fe0b6; }
+.button:disabled { opacity: .6; cursor: wait; transform: none; }
+.manage-toolbar, .resource-tabs, .record-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.manage-toolbar { justify-content: space-between; margin-bottom: 28px; }
+.role-badge { display: inline-block; padding: 2px 12px; border-radius: 999px; background: #29314d; color: var(--gold); font-size: .85rem; margin-left: 8px; }
+.record-list, .education-list { display: grid; gap: 20px; }
+.education-list { margin-bottom: 40px; }
+.record-card { padding: 28px; background: var(--panel); border: 1px solid var(--line); border-radius: 20px; overflow-wrap: anywhere; }
+.record-card h2 { margin: 0 0 10px; font-size: 1.35rem; }
+.record-description { white-space: pre-wrap; overflow-wrap: anywhere; }
+.record-meta { font-size: .85rem; color: var(--muted); }
+.record-form { margin-bottom: 28px; }
+.record-form h2 { margin: 0; }
+.record-fields { row-gap: 20px; }
+.wide-field { grid-column: 1 / -1; }
+.button.danger { color: #ffadb6; background: #351c29; border-color: #6a3145; }
+.delete-confirm { border-top: 1px solid var(--line); margin-top: 20px; padding-top: 12px; }
+:focus-visible { outline: 3px solid var(--gold); outline-offset: 4px; }
+@media (max-width: 720px) { .record-card { padding: 22px; } .manage-toolbar { align-items: flex-start; flex-direction: column; } .resource-tabs .button { padding-inline: 14px; } }
+.manage-page { padding-top: 44px; }
+.manage-page .page-heading { max-width: none; margin-bottom: 28px; }
+.manage-page .page-heading h1 { font-size: clamp(2.5rem, 5vw, 3.6rem); line-height: 1.1; margin: 12px 0 20px; }

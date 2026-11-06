@@ -2,9 +2,9 @@ import jwt from 'jsonwebtoken';
 import User from '../models/user.js';
 import asyncHandler from '../middleware/asyncHandler.js';
 
-const publicUser = (user) => ({ _id: user._id, name: user.name, email: user.email, created: user.created, updated: user.updated });
+const publicUser = (user) => ({ _id: user._id, name: user.name, email: user.email, role: user.role, created: user.created, updated: user.updated });
 const issueToken = (user, res) => {
-  const token = jwt.sign({ sub: user._id.toString() }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || '1d' });
+  const token = jwt.sign({ sub: user._id.toString(), version: user.tokenVersion }, process.env.JWT_SECRET, { expiresIn: '1d' });
   res.cookie('token', token, {
     httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax',
     maxAge: 24 * 60 * 60 * 1000,
@@ -14,7 +14,7 @@ const issueToken = (user, res) => {
 
 export const register = asyncHandler(async (req, res) => {
   const { name, email, password } = req.body;
-  if (!name || !email || !password) return res.status(400).json({ message: 'Name, email, and password are required.' });
+  if (typeof name !== 'string' || typeof email !== 'string' || typeof password !== 'string' || !name.trim() || !email.trim() || !password) return res.status(400).json({ message: 'Name, email, and password are required.' });
   const exists = await User.exists({ email: email.toLowerCase().trim() });
   if (exists) return res.status(409).json({ message: 'An account with this email already exists.' });
   const user = await User.create({ name, email, password });
@@ -24,7 +24,8 @@ export const register = asyncHandler(async (req, res) => {
 
 export const signIn = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
-  const user = await User.findOne({ email: email?.toLowerCase().trim() }).select('+password');
+  if (typeof email !== 'string' || typeof password !== 'string') return res.status(400).json({ message: 'Email and password are required.' });
+  const user = await User.findOne({ email: email.toLowerCase().trim() }).select('+password');
   if (!user || !password || !(await user.comparePassword(password))) {
     return res.status(401).json({ message: 'Email or password is incorrect.' });
   }
@@ -32,10 +33,16 @@ export const signIn = asyncHandler(async (req, res) => {
   res.json({ user: publicUser(user), token });
 });
 
-export const signOut = (_req, res) => {
+export const signOut = asyncHandler(async (req, res) => {
+  const token = req.cookies?.token || req.get('authorization')?.replace(/^Bearer\s+/i, '');
+  if (token) {
+    let payload;
+    try { payload = jwt.verify(token, process.env.JWT_SECRET); } catch { /* Clear expired cookies too. */ }
+    if (payload) await User.updateOne({ _id: payload.sub, tokenVersion: payload.version }, { $inc: { tokenVersion: 1 } });
+  }
   res.clearCookie('token', { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: 'lax' });
   res.json({ message: 'Signed out successfully.' });
-};
+});
 
 export const me = (req, res) => res.json({ user: publicUser(req.user) });
 export const listUsers = asyncHandler(async (_req, res) => {

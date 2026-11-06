@@ -1,25 +1,24 @@
 import React from "react";
+import { api } from "../lib/api";
 import { CodeXml, ExternalLink, Mail, MapPin } from "lucide-react";
 export default function Contact() {
   const [status, setStatus] = React.useState({ type: "", message: "" });
+  const empty = { firstName: "", lastName: "", email: "", phone: "", message: "" };
+  const [values, setValues] = React.useState(empty);
+  const [busy, setBusy] = React.useState(false);
+  const change = event => setValues({ ...values, [event.target.name]: event.target.value });
   async function handleSubmit(event) {
     event.preventDefault();
-    const form = event.currentTarget;
-    const data = Object.fromEntries(new FormData(form).entries());
+    const data = values;
+    setBusy(true);
     setStatus({ type: "info", message: "Sending your message…" });
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/api/contacts`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ firstname: data.firstName, lastname: data.lastName, email: data.email, phone: data.phone, message: data.message }),
-      });
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.message || "Unable to send your message.");
-      form.reset();
+      await api('/contacts', { method: 'POST', body: JSON.stringify({ firstname: data.firstName, lastname: data.lastName, email: data.email, phone: data.phone, message: data.message }) });
+      setValues(empty);
       setStatus({ type: "success", message: "Thanks — your message has been received." });
     } catch (error) {
       setStatus({ type: "error", message: `${error.message} Make sure the API server is running.` });
-    }
+    } finally { setBusy(false); }
   }
   return (
     <main className="page-shell page-content">
@@ -70,29 +69,29 @@ export default function Contact() {
           <div className="form-row">
             <label>
               First name
-              <input name="firstName" required />
+              <input name="firstName" value={values.firstName} onChange={change} required />
             </label>
             <label>
               Last name
-              <input name="lastName" required />
+              <input name="lastName" value={values.lastName} onChange={change} required />
             </label>
           </div>
           <div className="form-row">
             <label>
               Email address
-              <input name="email" type="email" required />
+              <input name="email" value={values.email} onChange={change} type="email" required />
             </label>
             <label>
               Contact number
-              <input name="phone" type="tel" required />
+              <input name="phone" value={values.phone} onChange={change} type="tel" required />
             </label>
           </div>
           <label>
             Message
-            <textarea name="message" rows="6" required />
+            <textarea name="message" value={values.message} onChange={change} rows="6" required />
           </label>
-          <button className="button primary" type="submit">
-            Send message
+          <button className="button primary" type="submit" disabled={busy}>
+            {busy ? "Sending…" : "Send message"}
           </button>
           {status.message && <p role="status" aria-live="polite" className={`form-status ${status.type}`}>{status.message}</p>}
         </form>
