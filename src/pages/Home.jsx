@@ -23,7 +23,7 @@ export default function Home() {
             web developer focused on responsive, thoughtful applications.
           </p>
           <p className="hero-lead">
-  I build full stack web applications with React, Express and MongoDB.
+  I build responsive full stack web applications with React, Express and MongoDB.
 </p>
           <div className="hero-actions">
             <Link to="/projects" className="button primary">
