@@ -10,12 +10,18 @@
     "server": "nodemon server.js",
     "start": "node server.js",
     "seed": "node scripts/seed.js",
-    "test": "node --test --test-concurrency=1 tests/api.test.js",
-    "test:e2e": "playwright test"
+    "test": "npm run test:unit && npm run build && npm run test:api",
+    "test:e2e": "playwright test",
+    "test:api": "node --test --test-concurrency=1 tests/api.test.js",
+    "test:unit": "vitest run",
+    "test:cypress": "node scripts/run-cypress.js",
+    "test:performance": "node scripts/performance-check.js",
+    "test:evidence": "node scripts/capture-test-evidence.js"
   },
   "dependencies": {
     "@vitejs/plugin-react": "6.1.1",
     "bcryptjs": "^2.4.3",
+    "compression": "^1.8.2",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
@@ -32,10 +38,17 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.56.1",
+    "@testing-library/jest-dom": "^8.0.0",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.13",
     "concurrently": "^9.1.2",
+    "cypress": "^15.7.0",
+    "jsdom": "^31.0.1",
     "mongodb-memory-server": "^11.3.0",
     "nodemon": "^3.1.9",
-    "supertest": "^7.3.1"
+    "start-server-and-test": "^3.0.13",
+    "supertest": "^7.3.1",
+    "vitest": "^5.1.1"
   },
   "engines": {
     "node": ">=22.12.0"

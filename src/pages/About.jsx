@@ -8,7 +8,7 @@ export default function About() {
       </div>
       <section className="about-grid">
         <div className="about-photo">
-          <img src="/assets/yuri-koller.png" alt="Portrait of Yuri Koller" />
+          <img src="/assets/yuri-koller.webp" alt="Portrait of Yuri Koller" width="450" height="630" />
         </div>
         <div className="about-copy">
           <h2>Hi, I’m Yuri Koller.</h2>

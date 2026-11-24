@@ -13,4 +13,6 @@ const projectSchema = new mongoose.Schema({
   description: { type: String, required: true, trim: true },
 }, { timestamps: true });
 
+projectSchema.index({ createdAt: -1 });
+
 export default mongoose.model('Project', projectSchema, 'projects');

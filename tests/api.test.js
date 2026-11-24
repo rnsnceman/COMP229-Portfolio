@@ -94,3 +94,20 @@ test('both signout methods clear cookies and invalidate bearer JWTs', async () =
   await user.post('/api/auth/signout').expect(200);
   await user.get('/api/auth/me').expect(401);
 });
+test('production bundle is compressed and fingerprinted assets have immutable caching', async () => {
+  const { readdir } = await import('node:fs/promises');
+  const entry = (await readdir('dist/assets')).find(file => /^index-.*\.js$/.test(file));
+  const response = await request(app).get(`/assets/${entry}`).set('Accept-Encoding', 'gzip').expect(200);
+  assert.equal(response.headers['content-encoding'], 'gzip');
+  assert.match(response.headers['cache-control'], /immutable/);
+  await request(app).get('/manage').expect(200).expect('Cache-Control', 'no-cache');
+});
+test('account and database responses are not stored by shared caches', async () => {
+  await request(app).get('/api/projects').expect('Cache-Control', 'no-store');
+  await request(app).get('/api/auth/me').expect(401).expect('Cache-Control', 'no-store');
+});
+test('health endpoint fails readiness when MongoDB is disconnected', async () => {
+  await mongoose.disconnect();
+  const response = await request(app).get('/api/health').expect(503);
+  assert.equal(response.body.database, 'disconnected');
+});

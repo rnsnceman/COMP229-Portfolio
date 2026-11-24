@@ -18,7 +18,7 @@ export default function ResourceList({ resource }) {
   return <>{user?.role === 'admin' && <p><Link className="button secondary" to="/manage">Manage portfolio</Link></p>}
     {!items.length && <p>No {resource} have been added yet.</p>}
     <section className={resource === 'projects' ? 'project-grid' : 'education-list'}>{items.map((item, index) => <article className="project-card" key={item._id}>
-      {resource === 'projects' && item.image && <div className="project-image"><img src={item.image} alt={`${item.title} website screenshot`} /></div>}
+      {resource === 'projects' && item.image && <div className="project-image"><img loading={index < 2 ? 'eager' : 'lazy'} decoding="async" width="1280" height="724" src={item.image} alt={`${item.title} website screenshot`} /></div>}
       <div className="project-body"><div className="project-meta"><span>{String(index + 1).padStart(2, '0')}</span><span>{item.year || (item.completion ? new Date(item.completion).toLocaleDateString('en-CA', { timeZone: 'UTC', year: 'numeric', month: 'long' }) : 'Professional certificate')}</span></div>
         <h2>{item.title}</h2>{item.role && <p className="project-role">{item.role}</p>}<p className="record-description">{item.description}</p>
         {item.url && <a className="project-link" href={item.url} target="_blank" rel="noreferrer">Visit project ↗</a>}

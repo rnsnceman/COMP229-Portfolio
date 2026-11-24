@@ -1,4 +1,5 @@
 import express from 'express';
+import compression from 'compression';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
@@ -16,6 +17,9 @@ import userRoutes from './routes/userRoutes.js';
 export function createApp({ rateLimits = true } = {}) {
   if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) throw new Error('Set JWT_SECRET to at least 32 characters in .env.');
   const app = express();
+  if (process.env.NODE_ENV === 'production') app.set('trust proxy', 1);
+  app.use(compression());
+  app.use('/api', (_req, res, next) => { res.set('Cache-Control', 'no-store'); next(); });
   app.use(helmet({ contentSecurityPolicy: { directives: { imgSrc: ["'self'", 'data:', 'https:'], fontSrc: ["'self'", 'https:', 'data:'], styleSrc: ["'self'", 'https:', "'unsafe-inline'"] } } }));
   app.use(cors({ origin: process.env.CLIENT_ORIGIN || 'http://localhost:5173', credentials: true }));
   app.use(express.json({ limit: '20kb' }));
@@ -25,7 +29,10 @@ export function createApp({ rateLimits = true } = {}) {
     app.use('/api/auth/signup', rateLimit({ windowMs: 15 * 60 * 1000, limit: 20 }));
     app.use('/api/contacts', (req, res, next) => req.method === 'POST' ? contactLimit(req, res, next) : next());
   }
-  app.get('/api/health', (_req, res) => res.json({ status: 'ok', database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected' }));
+  app.get('/api/health', (_req, res) => {
+    const connected = mongoose.connection.readyState === 1;
+    res.status(connected ? 200 : 503).json({ status: connected ? 'ok' : 'unavailable', database: connected ? 'connected' : 'disconnected', revision: process.env.RENDER_GIT_COMMIT || 'local' });
+  });
   app.use('/api/contacts', resourceRoutes(Contact, { contact: true }));
   app.use('/api/projects', resourceRoutes(Project));
   app.use('/api/qualifications', resourceRoutes(Qualification));
@@ -34,8 +41,11 @@ export function createApp({ rateLimits = true } = {}) {
   app.use('/api', (_req, res) => res.status(404).json({ message: 'Route not found.' }));
   const dist = path.resolve('dist');
   if (existsSync(dist)) {
-    app.use(express.static(dist));
-    app.get('*', (_req, res) => res.sendFile(path.join(dist, 'index.html')));
+    app.use(express.static(dist, { maxAge: '1h', setHeaders(res, file) {
+      if (/\.html$/.test(file)) res.set('Cache-Control', 'no-cache');
+      else if (/-[a-zA-Z0-9_-]{8,}\.(js|css)$/.test(file)) res.set('Cache-Control', 'public, max-age=31536000, immutable');
+    } }));
+    app.get('*', (_req, res) => { res.set('Cache-Control', 'no-cache'); return res.sendFile(path.join(dist, 'index.html')); });
   }
   app.use((_req, res) => res.status(404).json({ message: 'Route not found.' }));
   app.use((err, _req, res, _next) => {
