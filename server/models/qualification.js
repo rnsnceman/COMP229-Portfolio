@@ -9,4 +9,6 @@ const qualificationSchema = new mongoose.Schema({
   description: { type: String, required: true, trim: true },
 }, { timestamps: true });
 
+qualificationSchema.index({ createdAt: -1 });
+
 export default mongoose.model('Qualification', qualificationSchema, 'qualifications');

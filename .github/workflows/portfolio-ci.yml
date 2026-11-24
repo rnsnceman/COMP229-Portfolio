@@ -1,0 +1,53 @@
+name: Portfolio CI
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, 'assignment4-*']
+permissions:
+  contents: read
+concurrency:
+  group: portfolio-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CYPRESS_INSTALL_BINARY: '0'
+      MONGOMS_DISABLE_POSTINSTALL: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: React component unit tests
+        run: |
+          mkdir -p artifacts
+          set -o pipefail
+          npm run test:unit -- --reporter=verbose --reporter=json --outputFile=artifacts/unit-results.json | tee artifacts/unit-tests.txt
+      - name: Build deployable frontend
+        run: npm run build
+      - name: Backend integration tests
+        run: |
+          set -o pipefail
+          npm run test:api | tee artifacts/api-tests.txt
+      - name: Performance budget
+        run: npm run test:performance
+      - name: Install Cypress test browser
+        run: npx cypress install
+        env:
+          CYPRESS_INSTALL_BINARY: ''
+      - name: Cypress E2E tests and video recording
+        run: xvfb-run -a npm run test:cypress
+      - name: Upload test evidence and recording
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: portfolio-assignment4-evidence
+          path: artifacts/
+          retention-days: 30
+          if-no-files-found: warn

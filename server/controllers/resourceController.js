@@ -2,10 +2,10 @@ const fields = (Model, body) => Object.fromEntries(Object.keys(Model.schema.path
 import asyncHandler from '../middleware/asyncHandler.js';
 
 export const list = (Model) => asyncHandler(async (_req, res) => {
-  res.json(await Model.find().sort({ createdAt: -1 }));
+  res.json(await Model.find().sort({ createdAt: -1 }).lean());
 });
 export const getById = (Model) => asyncHandler(async (req, res) => {
-  const record = await Model.findById(req.params.id);
+  const record = await Model.findById(req.params.id).lean();
   if (!record) return res.status(404).json({ message: 'Record not found.' });
   res.json(record);
 });

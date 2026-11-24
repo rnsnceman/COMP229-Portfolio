@@ -2,7 +2,7 @@ export const projects = [
   {
     title: "MiddleGround AI",
     url: "https://middleground-4vzj.vercel.app/",
-    image: "/assets/middleground.png",
+    image: "/assets/middleground.webp",
     year: "2024–2025",
     role: "Full-stack developer",
     description:

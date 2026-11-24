@@ -40,7 +40,7 @@ export default function Home() {
           <div className="portrait-accent">
             <Code2 />
           </div>
-          <img src="/assets/yuri-koller.png" alt="Yuri Koller" />
+          <img src="/assets/yuri-koller.webp" alt="Yuri Koller" width="450" height="630" fetchPriority="high" />
         </div>
       </section>
       <section className="home-strip">

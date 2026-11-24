@@ -8,4 +8,6 @@ const contactSchema = new mongoose.Schema({
   message: { type: String, required: true, trim: true, maxlength: 5000 },
 }, { timestamps: true });
 
+contactSchema.index({ createdAt: -1 });
+
 export default mongoose.model('Contact', contactSchema, 'contacts');

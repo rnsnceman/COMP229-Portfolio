@@ -7,3 +7,8 @@ build/
 !.env.example
 test-results
 playwright-report
+
+coverage/
+artifacts/
+cypress/videos/
+cypress/screenshots/

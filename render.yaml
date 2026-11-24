@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: yuri-koller-comp229-portfolio
+    runtime: node
+    plan: free
+    region: ohio
+    branch: main
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeployTrigger: checksPass
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "24"
+      - key: CYPRESS_INSTALL_BINARY
+        value: "0"
+      - key: MONGOMS_DISABLE_POSTINSTALL
+        value: "true"
+      - key: SEED_ON_START
+        value: "true"
+      - key: JWT_SECRET
+        generateValue: true
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: MONGODB_URI
+        sync: false
